@@ -1,8 +1,7 @@
-
 import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { Web3Provider } from "@ethersproject/providers";
-import TodoContract from "../../artifacts/contracts/Todo.sol/Todo.json"; // Ensure this path is correct
+import TodoContract from "../../artifacts/contracts/Todo.sol/Todo.json";
 
 const App = () => {
   const [todos, setTodos] = useState([]);
@@ -12,7 +11,7 @@ const App = () => {
   const [error, setError] = useState("");
   const [connected, setConnected] = useState(false);
 
-  const contractAddress = "0x5fbdb2315678afecb367f032d93f642f64180aa3"; // Replace with your contract address
+  const contractAddress = "0x5fbdb2315678afecb367f032d93f642f64180aa3";
 
   useEffect(() => {
     loadTasks();
@@ -56,38 +55,37 @@ const App = () => {
     }
   };
 
-  
-const addTodo = async () => {
-  if (contract && newTodo) {
-    try {
-      setLoading(true);
-      const tx = await contract.createTask(newTodo);
+  const addTodo = async () => {
+    if (contract && newTodo) {
+      try {
+        setLoading(true);
+        const tx = await contract.createTask(newTodo);
 
-      // Wait for the transaction to be mined
-      const receipt = await tx.wait();
+        // Wait for the transaction to be mined
+        const receipt = await tx.wait();
 
-      // Ensure the receipt is valid
-      if (receipt && typeof receipt.status === "number") {
-        if (receipt.status === 1) {
-          const updatedTodos = await contract.getAllTasks();
-          setTodos(updatedTodos);
-          setNewTodo("");
+        // Ensure the receipt is valid
+        if (receipt && typeof receipt.status === "number") {
+          if (receipt.status === 1) {
+            const updatedTodos = await contract.getAllTasks();
+            setTodos(updatedTodos);
+            setNewTodo("");
+          } else {
+            throw new Error("Transaction failed");
+          }
         } else {
-          throw new Error("Transaction failed");
+          throw new Error("Receipt is not in expected format");
         }
-      } else {
-        throw new Error("Receipt is not in expected format");
+      } catch (error) {
+        console.error("Error adding todo:", error);
+        setError("Failed to add todo. Please try again.");
+      } finally {
+        setLoading(false);
+        //refresh page
+        window.location.reload();
       }
-    } catch (error) {
-      console.error("Error adding todo:", error);
-      setError("Failed to add todo. Please try again.");
-    } finally {
-      setLoading(false);
-      //refresh page
-      window.location.reload();
     }
-  }
-};
+  };
 
   const completeTodo = async (index) => {
     if (contract) {
@@ -166,4 +164,3 @@ const addTodo = async () => {
 };
 
 export default App;
-
